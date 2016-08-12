@@ -1,0 +1,96 @@
+namespace QuestGeneratorDMBuddy
+{
+    public partial class QuestGen
+    {
+        string[] imports = new[] {"","","","","",""};
+        string[] exports = new []{"", "", "", "", "", "" };
+        string[] illicit = new []{"",""};
+        string[] luxury = new [] {"",""};
+        int numImp = rollD(6);
+        int numExp = rollD(6);
+        int numLux = rollD(2);
+        int numIll = rollD(2);
+
+        internal List<string> GDP = new List<string>();
+       
+        private async void Generate_Click(object sender, EventArgs e)
+        {
+            //get the server list of types from the parse server to work with.
+            ParseQuery<ParseObject> query = ParseObject.GetQuery("GDP");
+            ParseObject preftypecall = await query.FirstAsync();
+            //this will provide a list of the base types in a enumerable list."ores, lumber, furs, etc" 
+            IList<string> GDPList = preftypecall.Get<IList<string>>("type");
+           //populate the 4 catagories
+            string newimport = GDPList[rnd.Next(GDPList.Count)];
+            IList<string> ImportList = preftypecall.Get<IList<string>>(newimport);
+            for (int i = 0; i < numImp; i++) 
+            {   string imp = ImportList[rnd.Next(ImportList.Count)]; 
+                imports[i] = imp;
+                ImportList.Remove(imp);
+            }
+
+            textBox1.Text = imports[0];
+                            
+            textBox2.Text = imports[1];
+                           
+            textBox4.Text = imports[2];
+                            
+            textBox3.Text = imports[3];
+                          
+            textBox6.Text = imports[4];
+                          
+            textBox5.Text = imports[5];
+
+
+            string newexport = GDPList[rnd.Next(GDPList.Count)];
+            IList<string> ExportList = preftypecall.Get<IList<string>>(newexport);
+            for (int i = 0; i < numExp; i++)
+            {
+                string imp = ExportList[rnd.Next(ExportList.Count)];
+                exports[i] = imp;
+                ExportList.Remove(imp);
+            }
+
+            textBox12.Text = exports[0];
+
+            textBox11.Text = exports[1];
+            
+            textBox14.Text = exports[2];
+            
+            textBox13.Text = exports[3];
+            
+            textBox16.Text = exports[4];
+            
+            textBox15.Text = exports[5];
+
+            string newlux = GDPList[rnd.Next(GDPList.Count)];
+            IList<string> LuxList = preftypecall.Get<IList<string>>(newlux);
+            for (int i = 0; i < numLux; i++)
+            {
+                string imp = LuxList[rnd.Next(LuxList.Count)];
+                luxury[i] = imp;
+                LuxList.Remove(imp);
+            }
+
+            textBox8.Text = luxury[0];
+            textBox7.Text = luxury[1];
+
+            string newill = GDPList[rnd.Next(GDPList.Count)];
+            IList<string> IllList = preftypecall.Get<IList<string>>(newill);
+            for (int i = 0; i < numIll; i++)
+            {
+                string imp = IllList[rnd.Next(IllList.Count)];
+                illicit[i] = imp;
+                IllList.Remove(imp);
+            }
+
+            textBox18.Text = illicit[0];
+            textBox17.Text = illicit[1];
+
+            ItemDisplay.Text = "The Primary import here is " + textBox1.Text + " Which trades with " + textBox12.Text + " at " + rollD(6) + " to 1 " ;
+            if (luxury[0] != " ") { ItemDisplay.Text += textBox8.Text + " will be highly sought after and extremely rare to find"; }
+            if (illicit[0] != " ") { ItemDisplay.Text += textBox18.Text + " is highly illegal and will be confiscated if found, likely  with a heafty fine, or even imprisonment"; }
+        }
+    
+    }
+}
