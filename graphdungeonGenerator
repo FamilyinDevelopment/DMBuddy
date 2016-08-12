@@ -1,0 +1,216 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Diagnostics;
+using System.IO;
+
+
+namespace QuestGeneratorDMBuddy
+{
+    class Pair
+    {
+        int i1, i2;
+    }
+
+    public partial class QuestGen
+    {
+
+
+        public void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+           
+            DunGenB.Visible = true;
+            radPanel.Visible = true;
+            dunText.Text = "";
+        }
+        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            int xCoordinate = e.X;
+            int yCoordinate = e.Y;
+        }
+
+       
+        private void DunGenB_Click(object sender, EventArgs e)
+        {
+            #region // Get the dungeon room count based on selection
+            int rooms = 0;
+            int rSize = 4;
+            if (sizeSmall.Checked == true)
+            {
+                rooms = rollD(4);
+            }
+            else if (sizeMedium.Checked == true)
+            {
+                rooms = rollD(8); rSize = 6;
+            }
+            else if (sizeLarge.Checked == true)
+            {
+                rooms = rollD(12); rSize = 8;
+            }
+            else { return; }
+            #endregion
+
+            #region // Declarations and preamble
+            DunGenB.Visible = false;
+            radPanel.Visible = false;
+
+            Graphics g = pictureBox1.CreateGraphics();
+            int numOfCells = 13;
+            int cellSize = 20;
+            Pen p = new Pen(Color.Black);
+            SolidBrush WhiteBrush = new SolidBrush(Color.White);
+            Region r = new Region();
+
+            //build the grid array
+            for (int i = 0; i < numOfCells; i++)
+            {
+                
+                for (int j = 0; j < numOfCells; j++)
+                {
+                    grid[i, j] = 0;
+                }
+            }
+            #endregion
+
+            #region //Deploy Rooms in Grid with TLCorner
+            //deploy the rooms at random locations, we will fix overlap later.
+            for (int m = 0; m < rooms; m++)
+            {
+               int dropRoomX = rollD(numOfCells);
+               int dropRoomY = rollD(numOfCells);
+                //ensure the room is on grid and viewable
+                     if (dropRoomX > (numOfCells - (rSize / 2))) 
+                     { 
+                         dropRoomX = (numOfCells - (rSize / 2)); 
+                     }
+                     if (dropRoomY > (numOfCells - (rSize / 2)))
+                     {
+                         dropRoomY = (numOfCells - (rSize / 2));
+                     }
+               //place a 1 in the grid 
+                     if (grid[dropRoomX, dropRoomY] != 1)
+                     {
+                         int ycount = 0;
+                         int xcount = 0;
+                         for (int i = 0; i < (rSize /2); i++ ) 
+                         {
+                             xcount++;
+                             for (int j = 0; j < (rSize / 2); j++)
+                             {
+                                 grid[dropRoomX + i, dropRoomY + j] = 1;
+                                 ycount++;
+                             }
+                         }
+                         //create an ingress point (2) in the room now. can be any square. 
+                         
+                         List<int> line = new List<int>() { };
+
+                         for (int i = 0; i < numOfCells; i++)
+                         {
+                            
+                             for (int j = 0; j < numOfCells; j++)
+                             {
+                                 
+                                 //check if there is a 2 in the line
+                                 if (grid[i, j] == 1) 
+                                 {
+                                 //if there is , find the next 2 in the line
+                                     do
+                                     {
+                                         i++;
+                                         line.Add(j);
+                                     }                        
+                                     while (i < numOfCells); 
+                                     //once found, re-iterate through the list and number the grid
+                                     for (int l = 0; l < line.Count; l++) 
+                                     {
+                                        // grid[i, l] = 1;
+                                         
+                                     }
+
+                                 }
+
+                             }
+                         }
+                         //start a for loop to find 2 2's in a row, and/or column and make 
+                         //the rest of the x or y's between , 1's
+                     }
+                     else { rooms--; }
+          }
+        
+            #endregion
+            
+             #region //fill in the rooms as placed
+           //draw a rectangle at all locations
+            for (int i = 0; i < numOfCells; i++)
+            {
+                if (grid[i, 0] == 1|| grid[i,0]== 2)
+                {
+                    Rectangle rect = new Rectangle((i * cellSize), (1 * cellSize) + 1, cellSize, cellSize);
+                    g.FillRectangle(WhiteBrush, rect);
+                }
+                for (int j = 0; j < numOfCells; j++)
+                {
+                    if (grid[i, j] == 1 || grid[i,j] == 2)
+                    {
+                        Rectangle rect = new Rectangle((i * cellSize), (j * cellSize), cellSize, cellSize);
+                        g.FillRectangle(WhiteBrush, rect);
+                    }
+                }
+            }
+
+           #endregion
+
+          
+
+            #region  //draw the grid last to cover the dungeon
+
+            //draw the grid 
+            for (int y = 0; y < numOfCells; ++y)
+            {
+                g.DrawLine(p, 0, y * cellSize, numOfCells * cellSize, y * cellSize);
+            }
+
+            for (int x = 0; x < numOfCells; ++x)
+            {
+                g.DrawLine(p, x * cellSize, 0, x * cellSize, numOfCells * cellSize);
+
+            }
+            #endregion
+
+            GenerateText(rooms);
+        }
+
+            #region //Generate text based room descriptions and content (place held code complete)
+
+        private void GenerateText(int rooms)
+        {
+            string roomCont = "";
+            string roomdesc = "";
+            string[] allrooms = new string[] { };
+            string combined = "";
+            for (int i = 0; i < rooms; i++)
+            {
+                //for each room in the dungeon, get its description
+
+                roomdesc = rdescList[rnd.Next(rdescList.Length)];
+                roomCont = rConList[rnd.Next(rConList.Length)];
+                //load the strings into an array , print the array at the end, instead of the strings
+              
+              combined += "\n" + roomdesc + "\n" + roomCont + "\n";
+            }
+            //dunText.Text = duntext[0] + duntext[1] + duntext[2] + duntext[3];
+            dunText.Text = combined;
+        }
+
+        #endregion
+
+    }
+}
+ 
