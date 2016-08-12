@@ -1,0 +1,76 @@
+public class ParseManager : Singleton<ParseManager>
+{
+	public string levelName;
+
+	private Action<List<ParseObject>> levelSavedCallback;
+
+	public void SaveWorld ()
+	{
+		StartCoroutine (SaveWorldCor ());
+	}
+
+	private IEnumerator SaveWorldCor ()
+	{
+		var query = ParseObject.GetQuery ("Levels").WhereEqualTo ("name", levelName);
+
+		Task<ParseObject> getLevelTask = query.FirstAsync ();
+
+		while (!getLevelTask.IsCompleted) {
+			yield return null;
+		}
+
+		if (getLevelTask.IsFaulted || getLevelTask.IsCanceled) {
+			Debug.Log (getLevelTask.Exception.ToString ());
+		} else {
+			//This means the level already existed
+			//We delete the result of the get level task, in other words, we delete the old level that was retrieved.
+			Task deleteLevelTask = getLevelTask.Result.DeleteAsync ();
+
+			while (!deleteLevelTask.IsCompleted)
+				yield return null;
+		}
+
+		ParseObject levelObj = new ParseObject ("Levels");
+		levelObj ["name"] = levelName;
+		levelObj ["data"] = World.instance.GetData ();
+
+		Task t = levelObj.SaveAsync ();
+
+		while (!t.IsCompleted) {
+			yield return null;
+		}
+
+		//Now t is completed
+		if (t.IsCanceled || t.IsFaulted) {
+			Debug.Log (t.Exception.ToString ());
+		} else {
+			Debug.Log ("Level save success!");
+		}
+	}
+
+	public void LoadWorlds (Action<List<ParseObject>> callback)
+	{
+		levelSavedCallback = callback;
+		StartCoroutine (LoadWorldCor ());
+	}
+
+	private IEnumerator LoadWorldCor ()
+	{
+		var query = ParseObject.GetQuery ("Levels");
+		Task<IEnumerable<ParseObject>> t = query.FindAsync ();
+
+		while (!t.IsCompleted) {
+			yield return null;
+		}
+
+		if (t.IsFaulted || t.IsCanceled) {
+			Debug.Log (t.Exception.ToString ());
+		} else {
+			List<ParseObject> levels = new List<ParseObject> (t.Result);
+			foreach (ParseObject obj in levels) {
+				Debug.Log (obj ["data"]);
+			}
+			levelSavedCallback (levels);
+		}
+	}
+}
