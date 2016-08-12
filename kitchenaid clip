@@ -1,0 +1,62 @@
+class Kitchen
+    {
+
+      public static void Geting()
+        {//a function like GetChoice that will collect the information from the player
+            List<string> sPot = new List<string>();
+            string sChoice = Console.ReadLine();
+            if (sChoice != null)
+            {
+                int ichoice;
+                if (int.TryParse(sChoice, out ichoice)) // Try to parse the string as an integer
+                {
+                    if (ichoice <= sCuppboard.Count)
+                    {
+
+                        string sIngredient = sCupboard[choice];
+                        switch(eRecipe)//place holder for a public enum for recipes information
+                        {
+
+                            case sCupboard[0]:
+                            case sCupboard[1]:
+                            case sCupboard[2]:
+                            case sCupboard[3]:
+                            case sCupboard[4]:
+                            case sCupboard[5]:
+                            case sCupboard[6]:
+                            case sCupboard[7]:
+                            case sCupboard[8]:
+                            case sCupboard[9]:
+                           
+                        }
+                        sPot.Add(ingredient);
+                    }
+                }
+            }
+        }
+
+       
+
+        public void Kitchen() { 
+            //first function is to empty the basket into the cupboard
+        List<string> sCupboard = new List<string>();
+        List<string> sCooler = new List<string>();
+
+        for (int i = 0; i < sBasket.Count; i++)
+        {
+            sRecipe.Add(basket[i]);
+            sBasket.RemoveAt(i);
+        }
+
+        for (int i = 0; i < sCupboard.Count; i++)
+        {
+            Console.WriteLine("" + i +" " + sCupboard[i]);//then populate an updated list.
+        }
+            Console.WriteLine(StrArray[0]);
+           
+        }
+        
+        
+        //list possible recipe's for that ingrediant 
+        
+    }
