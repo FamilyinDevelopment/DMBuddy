@@ -1,0 +1,60 @@
+using UnityEngine;
+using System.Collections;
+using UnityEditor;
+using System.IO;
+
+public class LevelEditor : EditorWindow
+{
+	World world;
+	string path = "Assets/Levels/";
+	string levelName;
+	string extenstion = ".txt";
+
+	[MenuItem ("Window/PG06LevelEditor")]
+
+	public static void ShowWindow ()
+	{
+		//shows window of <> type
+		EditorWindow.GetWindow<LevelEditor> ();	
+	}
+
+	void OnGUI ()
+	{
+		if (world == null) {
+			world = FindObjectOfType<World> ();
+		}
+		if (world == null) {
+			GUILayout.Label ("No world in scene");
+			return;
+		}
+
+		GUILayout.Label ("My Level Editor!");
+
+
+		levelName = EditorGUILayout.TextField ("Name of Level:", levelName);
+
+		GUILayout.Label ("Save your World");
+
+		if (GUILayout.Button ("Save Current World")) {
+			string worldData = world.GetData ();
+
+			StreamWriter sw = File.CreateText (path + levelName + ".txt");
+			sw.Write (worldData);
+			sw.Close ();
+		}
+		DirectoryInfo dir = new DirectoryInfo (path);
+		FileInfo[] files = dir.GetFiles ("*" + extenstion);
+		foreach (FileInfo file in files) {
+			if (GUILayout.Button (file.Name)) {
+			
+				StreamReader sr = file.OpenText ();
+				string worldData = sr.ReadToEnd ();
+				world.SetData (worldData);
+				sr.Close ();
+			
+			}
+
+		}
+	}
+
+}
