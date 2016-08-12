@@ -1,0 +1,61 @@
+using UnityEngine;
+using System.Collections;
+using Pathfinding;
+using System.Linq;
+
+public class Idle : GenericState<Unit>
+{
+
+	public override void OnStateEnter ()
+	{
+		sm.anim.SetBool ("IsRunning", false);
+		sm.StartCoroutine (FindClosestBuilding ());
+	}
+
+	IEnumerator FindClosestBuilding ()
+	{
+		Building[] allBuildings = GameManager.instance.buildings.Where (x => x != null).Where (x => x.GetType () != typeof(Wall)).ToArray ();
+
+		//When all buildings are destroyed, allBuildings length will be 0
+		if (allBuildings.Length == 0) {
+			yield break;
+		}
+
+//		float closestDistance = Mathf.Infinity;
+//		Building closestBuilding = null;
+//
+//		foreach (Building b in allBuildings) {
+//			float distanceToBuilding = Vector3.Distance (sm.transform.position, b.transform.position);
+//			if (distanceToBuilding < closestDistance) {
+//				closestBuilding = b;
+//				closestDistance = distanceToBuilding;
+//			}
+//		}
+
+		Building closestBuilding = allBuildings
+			
+			.OrderBy (x => Vector3.Distance (x.transform.position, sm.transform.position))
+			.First ();
+
+
+		Path p = sm.seeker.StartPath (sm.transform.position, closestBuilding.transform.position);
+		//This will pause the execution of this method, until the path is calculated
+		yield return sm.StartCoroutine (p.WaitForPath ());
+
+		foreach (GraphNode node in p.path) {
+			if (node.Penalty != 0) {
+				Building b = GameManager.instance.buildingByNode [node];
+				if (b == null)
+					continue;
+				closestBuilding = b;
+				p = sm.seeker.StartPath (sm.transform.position, closestBuilding.transform.position);
+				yield return sm.StartCoroutine (p.WaitForPath ());
+				break;
+			}
+		}
+
+		sm.currentPath = p;
+		sm.SetState<Moving> ();
+		sm.currentTarget = closestBuilding;
+	}
+}
