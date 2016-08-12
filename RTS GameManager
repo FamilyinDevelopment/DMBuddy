@@ -1,0 +1,64 @@
+using UnityEngine;
+using System.Collections;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
+using Pathfinding;
+
+public class GameManager : Singleton<GameManager>
+{
+	public Dictionary<GraphNode, Building> buildingByNode = new Dictionary<GraphNode, Building> ();
+    public GameObject AreaBuff;
+    public float buffrange;
+	public Building[] buildings;
+	public string currentUnit = "Archer";
+    internal List<Vector3> clicked;
+
+   //build an array of all the buildings
+    void Start ()
+	{ 
+        clicked = new List<Vector3>();
+		buildings = FindObjectsOfType<Building> ();
+	}
+
+    
+    void Update()
+    {
+        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            //This method creates a ray, that starts in our world, where the mouse position currently is.
+            Ray camToWorldRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+            if (Physics.Raycast(camToWorldRay, out hitInfo))
+            {
+                SpawnUnit(hitInfo.point);
+            }
+        }
+
+        if (Input.GetMouseButton(1) && !EventSystem.current.IsPointerOverGameObject())
+        {
+
+            Ray camToWorldRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+            if (Physics.Raycast(camToWorldRay, out hitInfo))
+            {
+                Instantiate(AreaBuff, hitInfo.point, Quaternion.identity);
+                Collider[] surroundingColls = Physics.OverlapSphere(transform.position, buffrange);
+                foreach (Collider c in surroundingColls)
+                {
+                    if (c.GetComponent<Unit>())
+                    {
+                        Unit u = c.GetComponent<Unit>();
+                        u.Buffed();
+                    }
+                }
+            }
+
+        }
+    }
+	void SpawnUnit (Vector3 position)
+	{
+		Unit unitPrefab = Resources.Load<Unit> ("Units/" + currentUnit);
+		Instantiate (unitPrefab, position, new Quaternion ());
+        clicked.Add(unitPrefab.transform.position);
+	}
+}
