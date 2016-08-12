@@ -1,0 +1,45 @@
+namespace DMBuddies_Buddy
+{
+    public partial class Form1 : Form
+    {
+        string[] words;
+        char[] delimiterChars = { ',', '.', ':', '\t','"'};
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            ParseClient.Initialize(new ParseClient.Configuration
+            {
+                ApplicationId = "****************************",
+                WindowsKey = "********************************",
+                Server = "https://parseapi.back4app.com/"
+                  });
+        }
+
+        private async void PostMongDB_Click(object sender, EventArgs e)
+        {
+             List<string>wordslisted = new List<string>();
+            foreach(string s in words)
+            {
+                wordslisted.Add(s);
+               
+            }
+           IList<string> rowData = wordslisted;
+             
+            //create the object in the database, and add the column, then row data.
+
+            ParseObject className = new ParseObject(ClassName.Text);
+            className[ColumnName.Text] = rowData;
+            className["Type"] = TypeText.Text;
+            await className.SaveAsync();
+            
+        }
+
+        private void RowData_TextChanged(object sender, EventArgs e)
+        {
+         words = RowData.Text.Split(delimiterChars);
+        }
+
+    }
+}
