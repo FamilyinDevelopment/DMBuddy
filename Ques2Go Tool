@@ -1,4 +1,4 @@
-namespace DMBuddies_Buddy
+namespace Ques2Go_Buddy
 {
     public partial class Form1 : Form
     {
